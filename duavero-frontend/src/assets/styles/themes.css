@@ -1,0 +1,19 @@
+/* ==========================================================================
+   DUAVERO THEMES & DYNAMIC BRANDING INJECTION
+   ========================================================================== */
+
+/* Light Theme (Optional Toggle) */
+[data-theme="light"] {
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #f1f5f9;
+  --color-bg-card: rgba(255, 255, 255, 0.9);
+  --color-bg-card-hover: #ffffff;
+  
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-hover: rgba(0, 0, 0, 0.16);
+}

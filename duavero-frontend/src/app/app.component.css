@@ -1,0 +1,310 @@
+/* ==========================================================================
+   APP COMPONENT STYLES — LUXURY LIGHT INTERIOR THEME
+   ========================================================================== */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  padding: 0 32px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(184, 134, 11, 0.15);
+  box-shadow: 0 4px 20px rgba(44, 30, 15, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.brand-avatar-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  padding: 1px;
+  background: linear-gradient(135deg, #ca8a04, #eab308, #854d0e);
+  box-shadow: 0 4px 12px rgba(202, 138, 4, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.brand-avatar-container:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(202, 138, 4, 0.3);
+}
+
+.brand-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 11px;
+  object-fit: cover;
+}
+
+.brand-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1c1917;
+  line-height: 1.1;
+}
+
+.brand-subtitle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #854d0e;
+}
+
+.portal-nav {
+  display: flex;
+  gap: 4px;
+  background: rgba(245, 240, 232, 0.8);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(184, 134, 11, 0.12);
+}
+
+.portal-link {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #57534e;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.portal-link:hover {
+  color: #1c1917;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.active-portal {
+  background: #1c1917 !important;
+  color: #fef08a !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(28, 25, 23, 0.2);
+}
+
+.auth-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  padding: 4px 12px 4px 14px;
+  border-radius: 24px;
+  border: 1px solid rgba(184, 134, 11, 0.2);
+  box-shadow: 0 2px 8px rgba(44, 30, 15, 0.05);
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.user-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1c1917;
+}
+
+.user-submeta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.badge-gold {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.badge-neutral {
+  background: #f4f4f5;
+  color: #52525b;
+}
+
+.tenant-name {
+  font-size: 0.7rem;
+  color: #ca8a04;
+  font-weight: 600;
+}
+
+.btn-icon-logout {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-icon-logout:hover {
+  background: #fecaca;
+}
+
+.btn-signin {
+  padding: 8px 18px;
+  background: linear-gradient(135deg, #1c1917, #292524);
+  color: #fef08a;
+  border: 1px solid rgba(202, 138, 4, 0.3);
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(28, 25, 23, 0.15);
+  transition: all 0.2s ease;
+}
+
+.btn-signin:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(202, 138, 4, 0.25);
+  background: linear-gradient(135deg, #292524, #1c1917);
+}
+
+.portal-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   PINNED SUBTLE ELEGANT FOOTER (DEVELOPER CREDITS)
+   ========================================================================== */
+.app-footer {
+  margin-top: auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(184, 134, 11, 0.15);
+  padding: 14px 24px;
+  box-shadow: 0 -4px 20px rgba(44, 30, 15, 0.03);
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: #57534e;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-brand {
+  font-weight: 700;
+  color: #1c1917;
+}
+
+.footer-sep {
+  color: #d6d3d1;
+}
+
+.footer-tagline {
+  color: #78716c;
+  font-weight: 400;
+}
+
+.footer-credits {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.credit-label {
+  color: #78716c;
+}
+
+.credit-author {
+  color: #1c1917;
+  font-weight: 700;
+}
+
+.footer-link {
+  color: #854d0e;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s ease;
+}
+
+.footer-link:hover {
+  color: #ca8a04;
+  text-decoration: underline;
+}
+
+.link-icon {
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .top-nav {
+    padding: 0 16px;
+    height: auto;
+    min-height: 60px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .portal-nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .footer-container {
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+  }
+}

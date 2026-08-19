@@ -1,0 +1,83 @@
+<div class="app-shell">
+  <!-- Global Top Header Navigation (Luxury Light Theme) -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <div class="brand-avatar-container">
+        <img src="assets/logo/duavero-interior-icon.svg" alt="DuaVero Furnishing Icon" class="brand-avatar-img" />
+      </div>
+      <div class="brand-title-wrap">
+        <span class="brand-title">DuaVero</span>
+        <span class="brand-subtitle">Custom Furnishing & Interior Solutions</span>
+      </div>
+    </div>
+
+    <!-- Portal Switcher Links -->
+    <nav class="portal-nav">
+      <a routerLink="/public" routerLinkActive="active-portal" class="portal-link">
+        🛋️ Studio Portal
+      </a>
+      <a routerLink="/super-admin" routerLinkActive="active-portal" class="portal-link" *ngIf="authService.isSuperAdmin()">
+        ⚡ Platform Admin
+      </a>
+      <a routerLink="/tenant" routerLinkActive="active-portal" class="portal-link" *ngIf="authService.isTenantAdmin()">
+        🏢 Tenant Workspace
+      </a>
+      <a routerLink="/customer" routerLinkActive="active-portal" class="portal-link" *ngIf="authService.isAuthenticated()">
+        👤 Customer Portal
+      </a>
+    </nav>
+
+    <!-- Session Status & Auth Controls -->
+    <div class="auth-controls">
+      <div class="user-badge" *ngIf="authService.currentSession() as session; else loggedOutTmpl">
+        <div class="user-meta">
+          <span class="user-name">{{ session.firstName ? session.firstName + ' ' + (session.lastName || '') : session.email }}</span>
+          <div class="user-submeta">
+            <span class="badge" [ngClass]="session.userType === 'SUPER_ADMIN' ? 'badge-gold' : 'badge-neutral'">
+              {{ session.userType }}
+            </span>
+            <span class="tenant-name" *ngIf="session.tenantBusinessName">{{ session.tenantBusinessName }}</span>
+          </div>
+        </div>
+        <button id="btn-header-logout" (click)="handleLogout()" class="btn-icon-logout" title="Sign Out">
+          ⎋ Sign Out
+        </button>
+      </div>
+
+      <ng-template #loggedOutTmpl>
+        <a routerLink="/login" class="btn-signin">
+          🔐 Sign In
+        </a>
+      </ng-template>
+    </div>
+  </header>
+
+  <!-- Main Body / Routed View -->
+  <main class="portal-body">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Pinned Subtle Elegant Footer (Developer Credits) -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <span class="footer-brand">DuaVero</span>
+        <span class="footer-sep">•</span>
+        <span class="footer-tagline">Custom Furnishing & Interior Solutions</span>
+      </div>
+
+      <div class="footer-credits">
+        <span class="credit-label">Developed by:</span>
+        <strong class="credit-author">Azim Khan</strong>
+        <span class="footer-sep">•</span>
+        <a href="mailto:azimk3327@gmail.com" class="footer-link">
+          <span class="link-icon">✉️</span> azimk3327&#64;gmail.com
+        </a>
+        <span class="footer-sep">•</span>
+        <a href="tel:+918650321411" class="footer-link">
+          <span class="link-icon">📞</span> +91 8650321411
+        </a>
+      </div>
+    </div>
+  </footer>
+</div>

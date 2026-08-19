@@ -1,0 +1,45 @@
+# Root .gitignore for DuaVero Monorepo
+.DS_Store
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Environment variables and secrets (Strict - NEVER COMMIT)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# Backend (Maven / Java / Spring Boot)
+duavero-backend/target/
+duavero-backend/bin/
+duavero-backend/.mvn/timing.properties
+duavero-backend/*.log
+logs/
+
+# Frontend (Node / Angular)
+duavero-frontend/node_modules/
+duavero-frontend/dist/
+duavero-frontend/.angular/
+duavero-frontend/coverage/
+duavero-frontend/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker & Scratch
+scratch/
+docker-data/

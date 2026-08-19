@@ -1,0 +1,5 @@
+/* Global style imports for DuaVero Frontend */
+@import './assets/styles/variables.css';
+@import './assets/styles/layout.css';
+@import './assets/styles/components.css';
+@import './assets/styles/themes.css';
