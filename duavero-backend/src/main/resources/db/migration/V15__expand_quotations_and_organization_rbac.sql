@@ -4,19 +4,19 @@
 -- ============================================================================
 
 -- 1. Extend Master Categories with HSN Code, Tax Slab, and Soft Delete Safeguard
-ALTER TABLE master_categories ADD COLUMN IF NOT EXISTS hsn_code VARCHAR(30) NULL;
-ALTER TABLE master_categories ADD COLUMN IF NOT EXISTS default_tax_rate DECIMAL(5,2) NOT NULL DEFAULT 18.00;
-ALTER TABLE master_categories ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE master_categories ADD COLUMN hsn_code VARCHAR(30) NULL;
+ALTER TABLE master_categories ADD COLUMN default_tax_rate DECIMAL(5,2) NOT NULL DEFAULT 18.00;
+ALTER TABLE master_categories ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- 2. Extend Quotations with Tiered Approval Fields, Updated By, and Discount Justification
-ALTER TABLE quotations ADD COLUMN IF NOT EXISTS discount_percentage DECIMAL(5,2) NOT NULL DEFAULT 0.00;
-ALTER TABLE quotations ADD COLUMN IF NOT EXISTS discount_approval_reason VARCHAR(500) NULL;
-ALTER TABLE quotations ADD COLUMN IF NOT EXISTS approved_by BIGINT NULL;
-ALTER TABLE quotations ADD COLUMN IF NOT EXISTS approved_at DATETIME NULL;
-ALTER TABLE quotations ADD COLUMN IF NOT EXISTS updated_by BIGINT NULL;
+ALTER TABLE quotations ADD COLUMN discount_percentage DECIMAL(5,2) NOT NULL DEFAULT 0.00;
+ALTER TABLE quotations ADD COLUMN discount_approval_reason VARCHAR(500) NULL;
+ALTER TABLE quotations ADD COLUMN approved_by BIGINT NULL;
+ALTER TABLE quotations ADD COLUMN approved_at DATETIME NULL;
+ALTER TABLE quotations ADD COLUMN updated_by BIGINT NULL;
 
 -- 3. Extend Quotation Items with HSN Code
-ALTER TABLE quotation_items ADD COLUMN IF NOT EXISTS hsn_code VARCHAR(30) NULL;
+ALTER TABLE quotation_items ADD COLUMN hsn_code VARCHAR(30) NULL;
 
 -- 4. Register Granular Permissions for RBAC Matrix & Category Governance
 INSERT INTO permissions (id, module, action, code, description) VALUES
