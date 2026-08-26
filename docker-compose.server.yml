@@ -1,0 +1,106 @@
+version: '3.8'
+
+# =========================================================================
+# DuaVero Production / UAT Server Stack (Oracle VM)
+# Place in ~/app/uat/docker-compose.yml or ~/app/prod/docker-compose.yml
+# =========================================================================
+
+services:
+  # -----------------------------------------------------------------------
+  # Backend: Spring Boot 3 + OpenJDK 17
+  # -----------------------------------------------------------------------
+  backend:
+    image: ${DOCKER_USER}/backend:${ENV_TAG:-uat}
+    container_name: duavero-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-uat}
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=${DB_NAME:-duavero_db}
+      - DB_USERNAME=${DB_USERNAME:-duavero_user}
+      - DB_PASSWORD=${DB_PASSWORD:-duavero_secure_pass}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DUAVERO_JWT_SECRET=${DUAVERO_JWT_SECRET:-duavero-super-secure-jwt-secret-key-32chars-min}
+      - DUAVERO_ENCRYPTION_KEY=${DUAVERO_ENCRYPTION_KEY:-duavero-aes-256-gcm-master-encryption-key-32b}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-*}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - duavero-network
+
+  # -----------------------------------------------------------------------
+  # Frontend: Angular 18 + Nginx Alpine Reverse Proxy
+  # -----------------------------------------------------------------------
+  frontend:
+    image: ${DOCKER_USER}/frontend:${ENV_TAG:-uat}
+    container_name: duavero-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - duavero-network
+
+  # -----------------------------------------------------------------------
+  # Database: MySQL 8.0
+  # -----------------------------------------------------------------------
+  mysql:
+    image: mysql:8.0.36
+    container_name: duavero-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-duavero_db}
+      MYSQL_USER: ${DB_USERNAME:-duavero_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-duavero_secure_pass}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secure_pass}
+    command: >
+      --default-authentication-plugin=caching_sha2_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --explicit_defaults_for_timestamp=1
+      --sql_mode=STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "--default-auth=caching_sha2_password", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_secure_pass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - duavero-network
+
+  # -----------------------------------------------------------------------
+  # Cache & Schedulers: Redis 7.2 Alpine
+  # -----------------------------------------------------------------------
+  redis:
+    image: redis:7.2-alpine
+    container_name: duavero-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - duavero-network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  duavero-network:
+    driver: bridge

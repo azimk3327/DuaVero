@@ -1,27 +1,36 @@
-name: Automated Multi-Branch CI/CD Pipeline
+name: DuaVero CI/CD Pipeline
 
 on:
   push:
     branches:
-      - 'azim_uat'
+      - 'main'
+      - 'develop'
       - 'azim_main'
+      - 'azim_uat'
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Deployment Environment'
+        required: true
+        default: 'uat'
+        type: choice
+        options:
+          - uat
+          - prod
 
 jobs:
   # =========================================================================
-  # 1. BUILD & TEST JOB
+  # 1. BUILD & TEST SUITE
   # =========================================================================
-  build-and-test:
-    name: Build & Test (Spring Boot 3 + Angular 17)
+  test:
+    name: Build & Test (Java 17 & Node 20)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # ---------------------------------------------------------------------
-      # Backend: Spring Boot 3 with Java 17
-      # ---------------------------------------------------------------------
+      # Backend Build & Test (Spring Boot 3 + Maven)
       - name: Set up JDK 17 (Temurin)
         uses: actions/setup-java@v4
         with:
@@ -34,9 +43,7 @@ jobs:
         run: |
           mvn clean test -B
 
-      # ---------------------------------------------------------------------
-      # Frontend: Angular 17 with Node 20
-      # ---------------------------------------------------------------------
+      # Frontend Build & Typecheck (Angular 18 + Node 20)
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
@@ -44,74 +51,100 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ./duavero-frontend/package-lock.json
 
-      - name: Install Frontend Dependencies & Build Production Bundle
+      - name: Verify Frontend Production Build
         working-directory: ./duavero-frontend
         run: |
           npm ci
           npm run build -- --configuration=production
 
   # =========================================================================
-  # 2. DEPLOY JOB (Runs after Build & Test passes)
+  # 2. DOCKER BUILD & PUSH TO DOCKER HUB
   # =========================================================================
-  deploy:
-    name: Deploy to Remote Server via SSH
-    needs: build-and-test
+  build-and-push:
+    name: Build & Push Docker Images
+    needs: test
     runs-on: ubuntu-latest
-    if: github.ref_name == 'azim_uat' || github.ref_name == 'azim_main'
+    outputs:
+      env_tag: ${{ steps.env_config.outputs.ENV_TAG }}
 
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Determine Deployment Environment & Target Directory
+      # Determine environment: develop/azim_uat -> uat, main/azim_main -> prod
+      - name: Determine Target Environment & Tags
         id: env_config
         run: |
-          if [ "${{ github.ref_name }}" = "azim_uat" ]; then
-            echo "DEPLOY_DIR=/home/ubuntu/duavero-uat" >> $GITHUB_OUTPUT
-            echo "DOMAIN=duavero-uat.duckdns.org" >> $GITHUB_OUTPUT
-            echo "ENV_NAME=UAT" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref_name }}" = "azim_main" ]; then
-            echo "DEPLOY_DIR=/home/ubuntu/duavero-prod" >> $GITHUB_OUTPUT
-            echo "DOMAIN=duavero-app.duckdns.org" >> $GITHUB_OUTPUT
-            echo "ENV_NAME=PRODUCTION" >> $GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.environment }}"
+          elif [ "${{ github.ref_name }}" = "main" ] || [ "${{ github.ref_name }}" = "azim_main" ]; then
+            TAG="prod"
+          else
+            TAG="uat"
           fi
+          echo "ENV_TAG=${TAG}" >> $GITHUB_OUTPUT
+          echo "Target Environment Tag: ${TAG}"
 
-      - name: Execute Remote Deployment via SSH
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build and Push Backend Container Image
+      - name: Build & Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./duavero-backend
+          file: ./duavero-backend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ steps.env_config.outputs.ENV_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Build and Push Frontend Container Image
+      - name: Build & Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./duavero-frontend
+          file: ./duavero-frontend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ steps.env_config.outputs.ENV_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # =========================================================================
+  # 3. REMOTE DEPLOYMENT TO ORACLE VM VIA SSH
+  # =========================================================================
+  deploy:
+    name: Deploy to Oracle VM
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute Deployment on Remote Host
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST_IP }}
+          host: 140.245.219.162
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            DEPLOY_PATH="${{ steps.env_config.outputs.DEPLOY_DIR }}"
-            DOMAIN_NAME="${{ steps.env_config.outputs.DOMAIN }}"
-            BRANCH_NAME="${{ github.ref_name }}"
-
+            ENV_NAME="${{ needs.build-and-push-docker.outputs.env_tag || needs.build-and-push.outputs.env_tag }}"
             echo "========================================================="
-            echo "Deploying branch: $BRANCH_NAME to $DEPLOY_PATH"
-            echo "Domain mapping: $DOMAIN_NAME"
+            echo "Deploying DuaVero to environment: $ENV_NAME"
+            echo "Host path: ~/app/$ENV_NAME"
             echo "========================================================="
 
-            # Ensure deployment target directory exists
-            mkdir -p "$DEPLOY_PATH"
-            cd "$DEPLOY_PATH"
+            mkdir -p ~/app/$ENV_NAME
+            cd ~/app/$ENV_NAME
 
-            # Pull latest changes or clone if not already a repository
-            if [ -d .git ]; then
-              echo "Fetching latest changes..."
-              git fetch origin "$BRANCH_NAME"
-              git checkout "$BRANCH_NAME"
-              git reset --hard "origin/$BRANCH_NAME"
-            else
-              echo "Cloning repository..."
-              git clone -b "$BRANCH_NAME" https://github.com/${{ github.repository }}.git .
-            fi
+            export DOCKER_USER=${{ secrets.DOCKERHUB_USERNAME }}
+            docker compose pull
+            docker compose up -d --remove-orphans
+            docker image prune -f
 
-            # Deploy and rebuild containers
-            echo "Building and starting Docker containers..."
-            docker compose up -d --build --remove-orphans
-
-            # Verify container status
-            echo "Deployment verification:"
-            docker compose ps
+            echo "Deployment completed successfully for $ENV_NAME."
